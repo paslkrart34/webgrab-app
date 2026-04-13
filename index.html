@@ -1,50 +1,1915 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!--
-       ______                            __
-      / ____/___  ____ ___  ____  __  __/ /____  _____
-     / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
-    / /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
-    \____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
-                        /_/
-            Created with Perplexity Computer
-            https://www.perplexity.ai/computer
-    -->
-    <meta name="generator" content="Perplexity Computer">
-    <meta name="author" content="Perplexity Computer">
-    <meta property="og:see_also" content="https://www.perplexity.ai/computer">
-    <link rel="author" href="https://www.perplexity.ai/computer">
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>WebGrab - Offline Website Reader</title>
-    <script type="module" crossorigin src="./assets/index-CnkgfX3h.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Ddu1hthN.css">
-      <link rel="manifest" href="./manifest.json">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="WebGrab - Offline news reader. Read articles offline from your favorite news sites.">
+    <meta name="theme-color" content="#1a1a2e">
+
+    <!-- Apple-specific meta tags for iOS PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="WebGrab">
-    <link rel="apple-touch-icon" href="/icon-192.png">
-  </head>
-  <body>
-    <div id="root"></div>
-      <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-              console.log('ServiceWorker registered:', registration);
-            })
-            .catch(err => {
-              console.log('ServiceWorker registration failed:', err);
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234361ee' width='180' height='180'/><text x='50%' y='50%' font-size='80' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>W</text></svg>">
+
+    <link rel="manifest" href="manifest.json">
+    <title>WebGrab - Offline Reader</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.light-mode {
+            background-color: #f8f9fa;
+            color: #1a1a2e;
+        }
+
+        /* App container with safe area support for iPhone notch */
+        #app {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-left: max(12px, env(safe-area-inset-left));
+            padding-right: max(12px, env(safe-area-inset-right));
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
+
+        /* View container */
+        .view {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        body.light-mode header {
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        button:active {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .primary-btn {
+            background-color: #4361ee;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .primary-btn:active {
+            background-color: #3551d4;
+            opacity: 0.8;
+        }
+
+        .secondary-btn {
+            background-color: rgba(67, 97, 238, 0.15);
+            color: #4361ee;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        body.light-mode .secondary-btn {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: #4361ee;
+        }
+
+        .secondary-btn:active {
+            opacity: 0.7;
+        }
+
+        /* Content area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 16px;
+        }
+
+        /* Library view styles */
+        .site-card {
+            background-color: #16213e;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light-mode .site-card {
+            background-color: #ffffff;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .site-card:active {
+            transform: scale(0.98);
+        }
+
+        .site-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background-color: #4361ee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .site-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .site-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .site-meta {
+            font-size: 13px;
+            color: #a0a0a0;
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        body.light-mode .site-meta {
+            color: #666;
+        }
+
+        .site-sync-btn {
+            background-color: #4361ee;
+            color: white;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            align-self: flex-end;
+            transition: background-color 0.2s;
+        }
+
+        .site-sync-btn:active {
+            background-color: #3551d4;
+        }
+
+        .site-sync-btn.syncing {
+            background-color: rgba(67, 97, 238, 0.5);
+            opacity: 0.7;
+        }
+
+        /* Progress indicator */
+        .sync-progress {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 4px;
+        }
+
+        body.light-mode .sync-progress {
+            color: #666;
+        }
+
+        /* Article list styles */
+        .article-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-left: 3px solid transparent;
+            border-left-color: #4361ee;
+        }
+
+        body.light-mode .article-item {
+            background-color: rgba(0, 0, 0, 0.02);
+            border-left-color: #4361ee;
+        }
+
+        .article-item:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .article-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .article-meta {
+            font-size: 12px;
+            color: #a0a0a0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        body.light-mode .article-meta {
+            color: #666;
+        }
+
+        .article-badge {
+            background-color: #4361ee;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .article-section {
+            background-color: rgba(67, 97, 238, 0.2);
+            color: #4361ee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Reader view styles */
+        .reader-container {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reader-content {
+            flex: 1;
+            padding: 20px 16px;
+            max-width: 680px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .reader-headline {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            color: #e0e0e0;
+        }
+
+        body.light-mode .reader-headline {
+            color: #1a1a2e;
+        }
+
+        .reader-byline {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        body.light-mode .reader-byline {
+            color: #666;
+        }
+
+        .reader-hero {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            background-color: #16213e;
+        }
+
+        .reader-body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 18px;
+            line-height: 1.7;
+            color: #e0e0e0;
+        }
+
+        body.light-mode .reader-body {
+            color: #1a1a2e;
+        }
+
+        .reader-body p {
+            margin-bottom: 16px;
+        }
+
+        .reader-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .reader-body strong {
+            font-weight: 700;
+        }
+
+        .reader-body em {
+            font-style: italic;
+        }
+
+        .reader-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #1a1a2e;
+            flex-shrink: 0;
+        }
+
+        body.light-mode .reader-nav {
+            background-color: #f8f9fa;
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .reader-position {
+            font-size: 13px;
+            color: #a0a0a0;
+        }
+
+        body.light-mode .reader-position {
+            color: #666;
+        }
+
+        .reader-arrow {
+            font-size: 20px;
+            color: #4361ee;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: flex-end;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #16213e;
+            border-radius: 16px 16px 0 0;
+            padding: 24px 16px;
+            max-height: 80vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        body.light-mode .modal {
+            background-color: #ffffff;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            color: #a0a0a0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #e0e0e0;
+        }
+
+        body.light-mode label {
+            color: #1a1a2e;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #0f3460;
+            color: #e0e0e0;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        body.light-mode input[type="text"],
+        body.light-mode input[type="url"] {
+            background-color: #f0f0f0;
+            color: #1a1a2e;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"]:focus,
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .quick-add-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .quick-add-btn {
+            background-color: #0f3460;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            color: #e0e0e0;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: left;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        body.light-mode .quick-add-btn {
+            background-color: #f0f0f0;
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #1a1a2e;
+        }
+
+        .quick-add-btn:active {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        /* Settings styles */
+        .settings-group {
+            margin-bottom: 24px;
+        }
+
+        .settings-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        body.light-mode .settings-group-title {
+            color: #666;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        body.light-mode .settings-item {
+            border-bottom-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-switch.active {
+            background-color: #4361ee;
+        }
+
+        .toggle-knob {
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 12px;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle-switch.active .toggle-knob {
+            left: 24px;
+        }
+
+        .banner {
+            background-color: rgba(243, 114, 69, 0.15);
+            border: 1px solid rgba(243, 114, 69, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #f37245;
+        }
+
+        body.light-mode .banner {
+            background-color: rgba(243, 114, 69, 0.1);
+            color: #c24a1a;
+        }
+
+        .danger-btn {
+            background-color: rgba(243, 114, 69, 0.15);
+            color: #f37245;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            width: 100%;
+            text-align: center;
+        }
+
+        body.light-mode .danger-btn {
+            background-color: rgba(243, 114, 69, 0.1);
+            color: #c24a1a;
+        }
+
+        .danger-btn:active {
+            opacity: 0.8;
+        }
+
+        /* Back button */
+        .back-btn {
+            font-size: 20px;
+        }
+
+        /* Section divider in article list */
+        .section-divider {
+            padding: 12px 16px 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        body.light-mode .section-divider {
+            color: #666;
+        }
+
+        /* Sync all button animation */
+        .sync-icon {
+            display: inline-block;
+            transition: transform 0.3s linear;
+        }
+
+        .sync-icon.syncing {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 481px) {
+            .quick-add-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Empty states */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 24px;
+        }
+
+        body.light-mode .empty-state-text {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- LIBRARY VIEW -->
+        <div id="libraryView" class="view active">
+            <header>
+                <div class="header-title">
+                    <span style="font-size: 28px;">📰</span> WebGrab
+                </div>
+                <div class="header-icons">
+                    <button id="syncAllBtn" title="Sync all sites">
+                        <span class="sync-icon">🔄</span>
+                    </button>
+                    <button id="settingsBtn" title="Settings">⚙️</button>
+                </div>
+            </header>
+
+            <div id="proxyBanner" class="banner" style="margin: 12px 16px 0; display: none;">
+                <strong>⚠️ Configure Proxy URL:</strong> Go to Settings and enter your CORS proxy URL to start syncing articles.
+            </div>
+
+            <div class="content" id="libraryContent">
+                <div id="sitesList"></div>
+                <button class="primary-btn" id="addSiteBtn" style="width: 100%; margin-top: 12px;">+ Add News Site</button>
+            </div>
+        </div>
+
+        <!-- SITE VIEW -->
+        <div id="siteView" class="view">
+            <header>
+                <button class="back-btn" id="siteBackBtn">←</button>
+                <div class="header-title" id="siteTitle"></div>
+                <button id="siteMenuBtn" title="Options">⋮</button>
+            </header>
+            <div class="content" id="siteContent">
+                <button class="secondary-btn" id="siteSyncBtn" style="width: 100%; margin-bottom: 12px;">🔄 Sync Articles</button>
+                <div id="siteLastSync" style="font-size: 12px; color: #a0a0a0; margin-bottom: 12px; text-align: center;"></div>
+                <div id="articlesList"></div>
+            </div>
+        </div>
+
+        <!-- READER VIEW -->
+        <div id="readerView" class="view">
+            <header>
+                <button class="back-btn" id="readerBackBtn">←</button>
+                <div style="flex: 1;"></div>
+                <button id="readerMenuBtn" title="Options">⋮</button>
+            </header>
+            <div class="reader-container">
+                <div class="reader-content" id="readerContent"></div>
+                <div class="reader-nav">
+                    <button class="reader-arrow" id="readerPrevBtn">←</button>
+                    <div class="reader-position" id="readerPosition"></div>
+                    <button class="reader-arrow" id="readerNextBtn">→</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span>Settings</span>
+                <button class="close-btn" id="closeSettingsBtn">✕</button>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-group-title">Proxy Configuration</div>
+                <div class="form-group">
+                    <label for="proxyUrlInput">CORS Proxy URL</label>
+                    <input type="url" id="proxyUrlInput" placeholder="https://your-cors-proxy.example.com/?url=">
+                    <p style="font-size: 12px; color: #a0a0a0; margin-top: 6px;">
+                        Use a CORS proxy like a Cloudflare Worker to bypass CORS restrictions. The URL should accept a <code style="background-color: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px;">?url=</code> parameter.
+                    </p>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-group-title">Display</div>
+                <div class="settings-item">
+                    <span>Dark Mode</span>
+                    <div id="darkModeToggle" class="toggle-switch active"></div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-group-title">Storage</div>
+                <div style="padding: 12px; background-color: rgba(67, 97, 238, 0.1); border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-size: 13px; margin-bottom: 4px;">Storage Used</div>
+                    <div id="storageUsage" style="font-size: 18px; font-weight: 600; color: #4361ee;"></div>
+                </div>
+                <button class="danger-btn" id="clearAllBtn">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addSiteModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span>Add News Site</span>
+                <button class="close-btn" id="closeAddSiteBtn">✕</button>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 12px; color: #a0a0a0; margin-bottom: 8px;">Quick Add</div>
+                <div class="quick-add-buttons">
+                    <button class="quick-add-btn" data-url="https://www.theguardian.com" data-name="The Guardian">📰 The Guardian</button>
+                    <button class="quick-add-btn" data-url="https://www.bbc.co.uk/news" data-name="BBC News">📺 BBC News</button>
+                    <button class="quick-add-btn" data-url="https://www.independent.co.uk" data-name="The Independent">📖 The Independent</button>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
+                <div style="font-size: 12px; color: #a0a0a0; margin-bottom: 12px;">Custom Site</div>
+                <div class="form-group">
+                    <label for="customSiteUrl">Site URL</label>
+                    <input type="url" id="customSiteUrl" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label for="customSiteName">Site Name</label>
+                    <input type="text" id="customSiteName" placeholder="My News Site">
+                </div>
+                <button class="primary-btn" id="addCustomSiteBtn" style="width: 100%;">Add Site</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="siteMenuModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span>Options</span>
+                <button class="close-btn" id="closeSiteMenuBtn">✕</button>
+            </div>
+            <button class="danger-btn" id="deleteSiteBtn">Delete All Articles</button>
+        </div>
+    </div>
+
+    <div id="readerMenuModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span>Options</span>
+                <button class="close-btn" id="closeReaderMenuBtn">✕</button>
+            </div>
+            <button class="danger-btn" id="deleteArticleBtn">Delete Article</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // IndexedDB Storage Layer
+        // ============================================================================
+
+        const DB_NAME = 'webgrab-db';
+        const DB_VERSION = 1;
+
+        let db = null;
+
+        /**
+         * Initialize the IndexedDB database
+         */
+        async function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+
+                    // Sites store: configured news sites
+                    if (!database.objectStoreNames.contains('sites')) {
+                        database.createObjectStore('sites', { keyPath: 'id' });
+                    }
+
+                    // Articles store: saved articles with indexes
+                    if (!database.objectStoreNames.contains('articles')) {
+                        const store = database.createObjectStore('articles', { keyPath: 'id' });
+                        store.createIndex('siteId', 'siteId', { unique: false });
+                        store.createIndex('savedAt', 'savedAt', { unique: false });
+                        store.createIndex('section', 'section', { unique: false });
+                    }
+                };
+            });
+        }
+
+        /**
+         * Save a news site configuration
+         */
+        async function saveSite(site) {
+            const transaction = db.transaction(['sites'], 'readwrite');
+            const store = transaction.objectStore('sites');
+            return new Promise((resolve, reject) => {
+                const request = store.put(site);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        /**
+         * Get all configured sites
+         */
+        async function getSites() {
+            const transaction = db.transaction(['sites'], 'readonly');
+            const store = transaction.objectStore('sites');
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        /**
+         * Get a single site by ID
+         */
+        async function getSite(siteId) {
+            const transaction = db.transaction(['sites'], 'readonly');
+            const store = transaction.objectStore('sites');
+            return new Promise((resolve, reject) => {
+                const request = store.get(siteId);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        /**
+         * Save an article
+         */
+        async function saveArticle(article) {
+            const transaction = db.transaction(['articles'], 'readwrite');
+            const store = transaction.objectStore('articles');
+            return new Promise((resolve, reject) => {
+                const request = store.put(article);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        /**
+         * Get articles by site ID
+         */
+        async function getArticlesBySite(siteId) {
+            const transaction = db.transaction(['articles'], 'readonly');
+            const store = transaction.objectStore('articles');
+            const index = store.index('siteId');
+            return new Promise((resolve, reject) => {
+                const request = index.getAll(siteId);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        /**
+         * Get a single article by ID
+         */
+        async function getArticle(articleId) {
+            const transaction = db.transaction(['articles'], 'readonly');
+            const store = transaction.objectStore('articles');
+            return new Promise((resolve, reject) => {
+                const request = store.get(articleId);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        /**
+         * Delete an article
+         */
+        async function deleteArticle(articleId) {
+            const transaction = db.transaction(['articles'], 'readwrite');
+            const store = transaction.objectStore('articles');
+            return new Promise((resolve, reject) => {
+                const request = store.delete(articleId);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        /**
+         * Delete all articles for a site
+         */
+        async function deleteArticlesBySite(siteId) {
+            const articles = await getArticlesBySite(siteId);
+            for (const article of articles) {
+                await deleteArticle(article.id);
+            }
+        }
+
+        /**
+         * Delete articles older than specified days
+         */
+        async function deleteOldArticles(daysOld) {
+            const transaction = db.transaction(['articles'], 'readwrite');
+            const store = transaction.objectStore('articles');
+            const cutoffTime = Date.now() - (daysOld * 24 * 60 * 60 * 1000);
+
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const articles = request.result;
+                    const deleteTransaction = db.transaction(['articles'], 'readwrite');
+                    const deleteStore = deleteTransaction.objectStore('articles');
+
+                    articles.forEach(article => {
+                        if (article.savedAt < cutoffTime) {
+                            deleteStore.delete(article.id);
+                        }
+                    });
+
+                    deleteTransaction.onerror = () => reject(deleteTransaction.error);
+                    deleteTransaction.oncomplete = () => resolve();
+                };
+            });
+        }
+
+        /**
+         * Clear all data from database
+         */
+        async function clearAllData() {
+            const transaction = db.transaction(['sites', 'articles'], 'readwrite');
+            transaction.objectStore('sites').clear();
+            transaction.objectStore('articles').clear();
+            return new Promise((resolve, reject) => {
+                transaction.onerror = () => reject(transaction.error);
+                transaction.oncomplete = () => resolve();
+            });
+        }
+
+        /**
+         * Get storage usage estimate
+         */
+        async function getStorageEstimate() {
+            if (navigator.storage && navigator.storage.estimate) {
+                try {
+                    const estimate = await navigator.storage.estimate();
+                    return {
+                        usage: estimate.usage,
+                        quota: estimate.quota,
+                        percentage: Math.round((estimate.usage / estimate.quota) * 100)
+                    };
+                } catch (e) {
+                    console.error('Storage estimate error:', e);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Format bytes to human-readable format
+         */
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // ============================================================================
+        // Article Extraction
+        // ============================================================================
+
+        /**
+         * Extract article content from HTML
+         * This function intelligently finds article title, byline, body, and hero image
+         */
+        function extractArticle(html, url) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Extract title
+            let title = '';
+            const ogTitle = doc.querySelector('meta[property="og:title"]');
+            if (ogTitle) {
+                title = ogTitle.getAttribute('content');
+            }
+            if (!title) {
+                const h1 = doc.querySelector('h1');
+                if (h1) title = h1.textContent.trim();
+            }
+            if (!title) {
+                title = doc.title;
+            }
+            title = title.substring(0, 200); // Limit to 200 chars
+
+            // Extract byline/author
+            let byline = '';
+            const authorMeta = doc.querySelector('meta[name="author"], meta[property="article:author"]');
+            if (authorMeta) {
+                byline = authorMeta.getAttribute('content');
+            }
+            // Try to find byline in common locations
+            if (!byline) {
+                const bylineSelector = '.byline, .author, [class*="byline"], [class*="author"], time';
+                const bylineEl = doc.querySelector(bylineSelector);
+                if (bylineEl) byline = bylineEl.textContent.trim().substring(0, 100);
+            }
+
+            // Extract section/category
+            let section = '';
+            const sectionMeta = doc.querySelector('meta[property="article:section"]');
+            if (sectionMeta) {
+                section = sectionMeta.getAttribute('content');
+            }
+
+            // Extract hero image URL
+            let heroImageUrl = '';
+            const ogImage = doc.querySelector('meta[property="og:image"]');
+            if (ogImage) {
+                heroImageUrl = ogImage.getAttribute('content');
+                // Convert relative URLs to absolute
+                if (heroImageUrl && !heroImageUrl.startsWith('http')) {
+                    const baseUrl = new URL(url);
+                    heroImageUrl = new URL(heroImageUrl, baseUrl.origin).href;
+                }
+            }
+
+            // Extract article body - try multiple selectors
+            let articleEl = doc.querySelector('article');
+            if (!articleEl) {
+                articleEl = doc.querySelector('.article-body, .content__article-body, #main-content, [role="main"], .story-body, main, .post-content, .entry-content');
+            }
+
+            let bodyHtml = '';
+            if (articleEl) {
+                // Clone to avoid modifying the original
+                const clone = articleEl.cloneNode(true);
+
+                // Remove unwanted elements
+                const removeSelectors = [
+                    'nav', 'footer', 'aside', 'script', 'style',
+                    '[class*="ad"], [class*="advertisement"], [id*="ad"], [id*="advertisement"]',
+                    '.related, .recommended, [class*="related"], [class*="recommended"]',
+                    '.social-share, .sharing, [class*="social"], [class*="share"]',
+                    '.comments, .comment-section, [class*="comment"]',
+                    'iframe[src*="twitter"], iframe[src*="facebook"], iframe[src*="youtube"]'
+                ];
+
+                removeSelectors.forEach(selector => {
+                    clone.querySelectorAll(selector).forEach(el => el.remove());
+                });
+
+                // Get inner HTML and clean it
+                bodyHtml = clone.innerHTML;
+
+                // Remove empty paragraphs
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = bodyHtml;
+                tempDiv.querySelectorAll('p').forEach(p => {
+                    if (!p.textContent.trim()) {
+                        p.remove();
+                    }
+                });
+                bodyHtml = tempDiv.innerHTML;
+            }
+
+            return {
+                title,
+                byline,
+                section,
+                content: bodyHtml,
+                heroImageUrl: heroImageUrl || null
+            };
+        }
+
+        // ============================================================================
+        // Homepage Parsing
+        // ============================================================================
+
+        /**
+         * Parse a news site homepage and extract article links
+         */
+        function parseHomepage(html, siteUrl) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const baseUrl = new URL(siteUrl);
+
+            // Get all links that look like articles
+            const articleLinks = new Map(); // Use Map to deduplicate by URL
+
+            const links = doc.querySelectorAll('a[href]');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+
+                try {
+                    const linkUrl = new URL(href, siteUrl);
+
+                    // Only same domain
+                    if (linkUrl.hostname !== baseUrl.hostname) return;
+
+                    // Exclude anchors
+                    if (linkUrl.hash && !linkUrl.pathname) return;
+
+                    // Exclude obvious non-article paths
+                    const pathname = linkUrl.pathname.toLowerCase();
+                    const excludePatterns = [
+                        '/author/', '/authors/',
+                        '/topic/', '/topics/', '/tag/', '/tags/',
+                        '/section/', '/sections/', '/category/', '/categories/',
+                        '/about', '/contact', '/privacy', '/terms',
+                        '/login', '/signin', '/signup', '/register',
+                        '/live/', '/video/', '/videos/',
+                        '/search', '/archive',
+                        '/amp/'
+                    ];
+
+                    if (excludePatterns.some(pattern => pathname.includes(pattern))) return;
+
+                    // Try to get link text or title attribute
+                    let title = link.textContent.trim();
+                    if (!title) {
+                        const titleAttr = link.getAttribute('title');
+                        if (titleAttr) title = titleAttr;
+                    }
+                    if (!title) return; // Skip links without text
+
+                    // Only add if we have reasonable content
+                    if (title.length > 10 && title.length < 300) {
+                        const cleanUrl = linkUrl.href.split('#')[0]; // Remove fragments
+                        if (!articleLinks.has(cleanUrl)) {
+                            articleLinks.set(cleanUrl, {
+                                url: cleanUrl,
+                                title: title.trim()
+                            });
+                        }
+                    }
+                } catch (e) {
+                    // Skip invalid URLs
+                }
+            });
+
+            return Array.from(articleLinks.values());
+        }
+
+        // ============================================================================
+        // Proxy Integration
+        // ============================================================================
+
+        /**
+         * Get the configured proxy URL from localStorage
+         */
+        function getProxyUrl() {
+            return localStorage.getItem('webgrab-proxy-url') || '';
+        }
+
+        /**
+         * Set the proxy URL in localStorage
+         */
+        function setProxyUrl(url) {
+            localStorage.setItem('webgrab-proxy-url', url);
+        }
+
+        /**
+         * Fetch content via the CORS proxy with timeout
+         */
+        async function fetchViaProxy(url) {
+            const proxyUrl = getProxyUrl();
+            if (!proxyUrl) {
+                throw new Error('Proxy URL not configured. Configure it in Settings.');
+            }
+
+            const proxiedUrl = `${proxyUrl}${proxyUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(url)}`;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+                const response = await fetch(proxiedUrl, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'text/html,application/xhtml+xml',
+                    }
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                return await response.text();
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error(`Timeout fetching ${url} (15s)`);
+                }
+                throw error;
+            }
+        }
+
+        // ============================================================================
+        // Sync Engine
+        // ============================================================================
+
+        /**
+         * Sync a single site: fetch homepage, parse articles, fetch and extract each article
+         */
+        async function syncSite(siteId) {
+            const site = await getSite(siteId);
+            if (!site) throw new Error('Site not found');
+
+            try {
+                // Fetch and parse homepage
+                const homepageHtml = await fetchViaProxy(site.url);
+                const articleLinks = parseHomepage(homepageHtml, site.url);
+
+                if (articleLinks.length === 0) {
+                    throw new Error('No articles found on homepage');
+                }
+
+                // Fetch articles with concurrency limit of 3
+                const existingArticles = await getArticlesBySite(siteId);
+                const existingUrls = new Set(existingArticles.map(a => a.url));
+
+                const articlesToFetch = articleLinks.filter(link => !existingUrls.has(link.url));
+
+                let synced = 0;
+                const errors = [];
+
+                // Process with concurrency limit
+                for (let i = 0; i < articlesToFetch.length; i += 3) {
+                    const batch = articlesToFetch.slice(i, i + 3);
+                    const results = await Promise.allSettled(
+                        batch.map(async (link) => {
+                            try {
+                                const articleHtml = await fetchViaProxy(link.url);
+                                const extracted = extractArticle(articleHtml, link.url);
+
+                                const article = {
+                                    id: `${siteId}-${Date.now()}-${Math.random()}`,
+                                    siteId,
+                                    url: link.url,
+                                    title: extracted.title || link.title,
+                                    byline: extracted.byline,
+                                    section: extracted.section,
+                                    content: extracted.content,
+                                    heroImageUrl: extracted.heroImageUrl,
+                                    savedAt: Date.now(),
+                                    readProgress: 0
+                                };
+
+                                await saveArticle(article);
+                                synced++;
+
+                                // Dispatch progress event
+                                window.dispatchEvent(new CustomEvent('sync-progress', {
+                                    detail: { siteId, synced, total: articlesToFetch.length }
+                                }));
+                            } catch (error) {
+                                errors.push(`${link.title}: ${error.message}`);
+                            }
+                        })
+                    );
+                }
+
+                // Delete old articles (older than 7 days)
+                await deleteOldArticles(7);
+
+                // Update site's lastSync time
+                site.lastSync = Date.now();
+                await saveSite(site);
+
+                return { synced, errors };
+            } catch (error) {
+                throw new Error(`Failed to sync ${site.name}: ${error.message}`);
+            }
+        }
+
+        // ============================================================================
+        // UI State Management
+        // ============================================================================
+
+        let currentSiteId = null;
+        let currentArticleId = null;
+        let allArticlesInSite = [];
+
+        /**
+         * Navigate to a view by ID
+         */
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        /**
+         * Close a modal
+         */
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        /**
+         * Open a modal
+         */
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        // ============================================================================
+        // Render Functions
+        // ============================================================================
+
+        /**
+         * Render the library view (list of sites)
+         */
+        async function renderLibraryView() {
+            const sites = await getSites();
+            const container = document.getElementById('sitesList');
+
+            if (sites.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📰</div>
+                        <div class="empty-state-title">No Sites Added</div>
+                        <div class="empty-state-text">Add your first news site to get started</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            for (const site of sites) {
+                const articles = await getArticlesBySite(site.id);
+                const storageUsage = await getStorageEstimate();
+                const siteStorageEstimate = Math.round((articles.length * 50) / 1024); // Rough estimate: 50KB per article
+
+                const lastSyncText = site.lastSync
+                    ? new Date(site.lastSync).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                    : 'Never';
+
+                const card = document.createElement('div');
+                card.className = 'site-card';
+                card.innerHTML = `
+                    <div class="site-icon">${site.icon || '📰'}</div>
+                    <div class="site-info">
+                        <div class="site-name">${site.name}</div>
+                        <div class="site-meta">
+                            <span>${articles.length} articles</span>
+                            <span>${formatBytes(siteStorageEstimate * 1024)}</span>
+                            <span>Last sync: ${lastSyncText}</span>
+                        </div>
+                        <div class="sync-progress" id="progress-${site.id}"></div>
+                    </div>
+                    <button class="site-sync-btn" data-site-id="${site.id}">Sync</button>
+                `;
+
+                card.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('site-sync-btn')) {
+                        currentSiteId = site.id;
+                        renderSiteView();
+                        navigateTo('siteView');
+                    }
+                });
+
+                card.querySelector('.site-sync-btn').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await handleSyncSite(site.id);
+                });
+
+                container.appendChild(card);
+            }
+
+            // Check if proxy is configured
+            const proxyUrl = getProxyUrl();
+            document.getElementById('proxyBanner').style.display = proxyUrl ? 'none' : 'block';
+        }
+
+        /**
+         * Render the site view (list of articles for a site)
+         */
+        async function renderSiteView() {
+            const site = await getSite(currentSiteId);
+            if (!site) return;
+
+            document.getElementById('siteTitle').textContent = site.name;
+
+            const lastSyncText = site.lastSync
+                ? `Last synced: ${new Date(site.lastSync).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
+                : 'Never synced';
+            document.getElementById('siteLastSync').textContent = lastSyncText;
+
+            const articles = await getArticlesBySite(currentSiteId);
+            allArticlesInSite = articles.sort((a, b) => b.savedAt - a.savedAt);
+
+            const container = document.getElementById('articlesList');
+
+            if (allArticlesInSite.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <div class="empty-state-title">No Articles</div>
+                        <div class="empty-state-text">Sync this site to download articles</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            // Group by section if available
+            const bySection = {};
+            allArticlesInSite.forEach(article => {
+                const sectionName = article.section || 'Uncategorized';
+                if (!bySection[sectionName]) bySection[sectionName] = [];
+                bySection[sectionName].push(article);
+            });
+
+            // Render articles grouped by section
+            Object.entries(bySection).forEach(([section, sectionArticles]) => {
+                const divider = document.createElement('div');
+                divider.className = 'section-divider';
+                divider.textContent = section;
+                container.appendChild(divider);
+
+                sectionArticles.forEach(article => {
+                    const item = document.createElement('div');
+                    item.className = 'article-item';
+
+                    const isNew = (Date.now() - article.savedAt) < (24 * 60 * 60 * 1000); // Less than 24 hours old
+
+                    item.innerHTML = `
+                        <div class="article-title">${article.title}</div>
+                        <div class="article-meta">
+                            ${article.byline ? `<span>${article.byline}</span>` : ''}
+                            ${article.section ? `<span class="article-section">${article.section}</span>` : ''}
+                            ${isNew ? `<span class="article-badge">NEW</span>` : ''}
+                        </div>
+                    `;
+
+                    item.addEventListener('click', () => {
+                        currentArticleId = article.id;
+                        renderReaderView();
+                        navigateTo('readerView');
+                    });
+
+                    container.appendChild(item);
+                });
+            });
+        }
+
+        /**
+         * Render the reader view (full article)
+         */
+        async function renderReaderView() {
+            const article = await getArticle(currentArticleId);
+            if (!article) return;
+
+            const container = document.getElementById('readerContent');
+            let heroHtml = '';
+
+            if (article.heroImageUrl) {
+                // Proxy the hero image so the service worker can cache it for offline
+                const proxyUrl = getProxyUrl();
+                const imgSrc = proxyUrl
+                    ? `${proxyUrl}${proxyUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(article.heroImageUrl)}`
+                    : article.heroImageUrl;
+                heroHtml = `<img src="${imgSrc}" alt="" class="reader-hero" onerror="this.style.display='none'">`;
+            }
+
+            container.innerHTML = `
+                <h1 class="reader-headline">${article.title}</h1>
+                ${article.byline ? `<div class="reader-byline">${article.byline}</div>` : ''}
+                ${heroHtml}
+                <div class="reader-body">${article.content}</div>
+            `;
+
+            // Update position indicator
+            const position = allArticlesInSite.findIndex(a => a.id === currentArticleId) + 1;
+            const total = allArticlesInSite.length;
+            document.getElementById('readerPosition').textContent = `${position} of ${total}`;
+
+            // Enable/disable navigation buttons
+            document.getElementById('readerPrevBtn').style.opacity = position === 1 ? '0.3' : '1';
+            document.getElementById('readerNextBtn').style.opacity = position === total ? '0.3' : '1';
+
+            // Track scroll progress
+            const readerContainer = document.querySelector('.reader-container');
+            const updateProgress = () => {
+                const scrollPercentage = (readerContainer.scrollTop / (readerContainer.scrollHeight - readerContainer.clientHeight)) * 100;
+                article.readProgress = Math.max(article.readProgress, Math.round(scrollPercentage));
+                saveArticle(article);
+            };
+            readerContainer.addEventListener('scroll', updateProgress);
+        }
+
+        /**
+         * Handle sync button click
+         */
+        async function handleSyncSite(siteId) {
+            const button = document.querySelector(`[data-site-id="${siteId}"]`);
+            const progressEl = document.getElementById(`progress-${siteId}`);
+
+            button.classList.add('syncing');
+            button.disabled = true;
+            progressEl.textContent = 'Syncing...';
+
+            try {
+                // Listen for progress events
+                const onProgress = (e) => {
+                    if (e.detail.siteId === siteId) {
+                        progressEl.textContent = `${e.detail.synced} of ${e.detail.total} articles`;
+                    }
+                };
+                window.addEventListener('sync-progress', onProgress);
+
+                const result = await syncSite(siteId);
+
+                progressEl.textContent = `Synced ${result.synced} new articles`;
+                window.removeEventListener('sync-progress', onProgress);
+
+                // Re-render library view
+                await renderLibraryView();
+
+                // If on site view, re-render it
+                if (currentSiteId === siteId) {
+                    await renderSiteView();
+                }
+            } catch (error) {
+                progressEl.textContent = `Error: ${error.message}`;
+                console.error('Sync error:', error);
+            } finally {
+                button.classList.remove('syncing');
+                button.disabled = false;
+            }
+        }
+
+        /**
+         * Handle sync all button
+         */
+        async function handleSyncAll() {
+            const button = document.getElementById('syncAllBtn');
+            const icon = button.querySelector('.sync-icon');
+
+            icon.classList.add('syncing');
+            button.disabled = true;
+
+            try {
+                const sites = await getSites();
+                for (const site of sites) {
+                    await handleSyncSite(site.id);
+                }
+            } catch (error) {
+                console.error('Sync all error:', error);
+            } finally {
+                icon.classList.remove('syncing');
+                button.disabled = false;
+            }
+        }
+
+        // ============================================================================
+        // Event Listeners
+        // ============================================================================
+
+        // Library view
+        document.getElementById('syncAllBtn').addEventListener('click', handleSyncAll);
+        document.getElementById('settingsBtn').addEventListener('click', () => openModal('settingsModal'));
+        document.getElementById('addSiteBtn').addEventListener('click', () => openModal('addSiteModal'));
+
+        // Site view
+        document.getElementById('siteBackBtn').addEventListener('click', () => {
+            navigateTo('libraryView');
+            renderLibraryView();
+        });
+        document.getElementById('siteSyncBtn').addEventListener('click', () => handleSyncSite(currentSiteId));
+        document.getElementById('siteMenuBtn').addEventListener('click', () => openModal('siteMenuModal'));
+        document.getElementById('closeSiteMenuBtn').addEventListener('click', () => closeModal('siteMenuModal'));
+        document.getElementById('deleteSiteBtn').addEventListener('click', async () => {
+            if (confirm('Delete all articles from this site?')) {
+                await deleteArticlesBySite(currentSiteId);
+                closeModal('siteMenuModal');
+                await renderSiteView();
+            }
+        });
+
+        // Reader view
+        document.getElementById('readerBackBtn').addEventListener('click', () => {
+            navigateTo('siteView');
+        });
+        document.getElementById('readerMenuBtn').addEventListener('click', () => openModal('readerMenuModal'));
+        document.getElementById('closeReaderMenuBtn').addEventListener('click', () => closeModal('readerMenuModal'));
+        document.getElementById('deleteArticleBtn').addEventListener('click', async () => {
+            if (confirm('Delete this article?')) {
+                await deleteArticle(currentArticleId);
+                closeModal('readerMenuModal');
+                await renderSiteView();
+                navigateTo('siteView');
+            }
+        });
+
+        // Reader navigation
+        document.getElementById('readerPrevBtn').addEventListener('click', () => {
+            const currentIndex = allArticlesInSite.findIndex(a => a.id === currentArticleId);
+            if (currentIndex > 0) {
+                currentArticleId = allArticlesInSite[currentIndex - 1].id;
+                renderReaderView();
+            }
+        });
+
+        document.getElementById('readerNextBtn').addEventListener('click', () => {
+            const currentIndex = allArticlesInSite.findIndex(a => a.id === currentArticleId);
+            if (currentIndex < allArticlesInSite.length - 1) {
+                currentArticleId = allArticlesInSite[currentIndex + 1].id;
+                renderReaderView();
+            }
+        });
+
+        // Settings modal
+        document.getElementById('closeSettingsBtn').addEventListener('click', () => closeModal('settingsModal'));
+        document.getElementById('proxyUrlInput').addEventListener('change', (e) => {
+            setProxyUrl(e.target.value);
+        });
+
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            const isDarkMode = document.body.classList.toggle('light-mode');
+            localStorage.setItem('webgrab-dark-mode', !isDarkMode);
+            document.getElementById('darkModeToggle').classList.toggle('active', isDarkMode === false);
+        });
+
+        document.getElementById('clearAllBtn').addEventListener('click', async () => {
+            if (confirm('Clear all data? This cannot be undone.')) {
+                await clearAllData();
+                await initializePreconfiguredSites();
+                await renderLibraryView();
+                closeModal('settingsModal');
+            }
+        });
+
+        // Add site modal
+        document.getElementById('closeAddSiteBtn').addEventListener('click', () => closeModal('addSiteModal'));
+
+        document.querySelectorAll('.quick-add-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const url = btn.getAttribute('data-url');
+                const name = btn.getAttribute('data-name');
+
+                const site = {
+                    id: `site-${Date.now()}`,
+                    name,
+                    url,
+                    icon: '📰',
+                    sections: [],
+                    lastSync: null
+                };
+
+                await saveSite(site);
+                await renderLibraryView();
+                closeModal('addSiteModal');
             });
         });
-      }
+
+        document.getElementById('addCustomSiteBtn').addEventListener('click', async () => {
+            const url = document.getElementById('customSiteUrl').value.trim();
+            const name = document.getElementById('customSiteName').value.trim();
+
+            if (!url || !name) {
+                alert('Please enter both URL and name');
+                return;
+            }
+
+            try {
+                new URL(url);
+            } catch {
+                alert('Invalid URL');
+                return;
+            }
+
+            const site = {
+                id: `site-${Date.now()}`,
+                name,
+                url,
+                icon: '📰',
+                sections: [],
+                lastSync: null
+            };
+
+            await saveSite(site);
+            document.getElementById('customSiteUrl').value = '';
+            document.getElementById('customSiteName').value = '';
+            await renderLibraryView();
+            closeModal('addSiteModal');
+        });
+
+        // ============================================================================
+        // Initialization
+        // ============================================================================
+
+        /**
+         * Initialize pre-configured news sites on first launch
+         */
+        async function initializePreconfiguredSites() {
+            const sites = await getSites();
+            if (sites.length === 0) {
+                const preconfigured = [
+                    {
+                        id: 'guardian',
+                        name: 'The Guardian',
+                        url: 'https://www.theguardian.com',
+                        icon: '📰',
+                        sections: [],
+                        lastSync: null
+                    },
+                    {
+                        id: 'bbc',
+                        name: 'BBC News',
+                        url: 'https://www.bbc.co.uk/news',
+                        icon: '📺',
+                        sections: [],
+                        lastSync: null
+                    },
+                    {
+                        id: 'independent',
+                        name: 'The Independent',
+                        url: 'https://www.independent.co.uk',
+                        icon: '📖',
+                        sections: [],
+                        lastSync: null
+                    }
+                ];
+
+                for (const site of preconfigured) {
+                    await saveSite(site);
+                }
+            }
+        }
+
+        /**
+         * Initialize the app
+         */
+        async function initializeApp() {
+            try {
+                // Register service worker
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('sw.js').catch(error => {
+                        console.warn('Service worker registration failed:', error);
+                    });
+                }
+
+                // Initialize database
+                await initDB();
+
+                // Initialize pre-configured sites
+                await initializePreconfiguredSites();
+
+                // Load theme preference
+                const isDarkMode = localStorage.getItem('webgrab-dark-mode') !== 'false';
+                if (!isDarkMode) {
+                    document.body.classList.add('light-mode');
+                    document.getElementById('darkModeToggle').classList.remove('active');
+                }
+
+                // Load proxy URL
+                const proxyUrl = getProxyUrl();
+                document.getElementById('proxyUrlInput').value = proxyUrl;
+
+                // Update storage usage
+                const estimate = await getStorageEstimate();
+                if (estimate) {
+                    document.getElementById('storageUsage').textContent =
+                        `${formatBytes(estimate.usage)} / ${formatBytes(estimate.quota)}`;
+                }
+
+                // Hash-based routing
+                const handleRoute = async () => {
+                    const hash = window.location.hash.slice(1).replace(/^\//, '') || '';
+
+                    if (hash === '' || hash === 'library') {
+                        navigateTo('libraryView');
+                        await renderLibraryView();
+                    } else if (hash.startsWith('site/')) {
+                        currentSiteId = hash.split('/')[1];
+                        navigateTo('siteView');
+                        await renderSiteView();
+                    } else if (hash.startsWith('article/')) {
+                        currentArticleId = hash.split('/')[1];
+                        navigateTo('readerView');
+                        await renderReaderView();
+                    } else {
+                        navigateTo('libraryView');
+                        await renderLibraryView();
+                    }
+                };
+
+                window.addEventListener('hashchange', handleRoute);
+                await handleRoute();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Failed to initialize app: ' + error.message);
+            }
+        }
+
+        // Start the app when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
-  </body>
+</body>
 </html>
