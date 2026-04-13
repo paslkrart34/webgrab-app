@@ -1133,10 +1133,30 @@
                 }
             }
 
-            // Extract article body - try multiple selectors
-            let articleEl = doc.querySelector('article');
+            // Extract article body - try site-specific selectors first, then generic ones
+            // The order matters: more specific selectors yield cleaner content
+            const hostname = new URL(url).hostname;
+            let articleEl = null;
+
+            if (hostname.includes('theguardian.com')) {
+                // Guardian uses these specific content containers
+                articleEl = doc.querySelector('.article-body-commercial-selector, .content__article-body, [data-gu-name="body"], .dcr-article');
+            } else if (hostname.includes('bbc.co.uk') || hostname.includes('bbc.com')) {
+                // BBC uses these content containers
+                articleEl = doc.querySelector('[data-component="text-block"], .ssrcss-11r1m41-RichTextComponentWrapper, .story-body, .article__body');
+            } else if (hostname.includes('independent.co.uk')) {
+                articleEl = doc.querySelector('#main-content .body-content, .article-body, .content');
+            }
+
+            // Fall back to generic selectors if site-specific ones didn't match
             if (!articleEl) {
-                articleEl = doc.querySelector('.article-body, .content__article-body, #main-content, [role="main"], .story-body, main, .post-content, .entry-content');
+                articleEl = doc.querySelector('.article-body, .content__article-body, #main-content article, [role="main"] article');
+            }
+            if (!articleEl) {
+                articleEl = doc.querySelector('article');
+            }
+            if (!articleEl) {
+                articleEl = doc.querySelector('[role="main"], main, .post-content, .entry-content');
             }
 
             let bodyHtml = '';
@@ -1146,12 +1166,23 @@
 
                 // Remove unwanted elements
                 const removeSelectors = [
-                    'nav', 'footer', 'aside', 'script', 'style',
-                    '[class*="ad"], [class*="advertisement"], [id*="ad"], [id*="advertisement"]',
+                    'nav', 'footer', 'aside', 'script', 'style', 'noscript',
+                    '[class*="ad-"], [class*="ad_"], [class*="advertisement"], [id*="ad-"], [id*="ad_"], [id*="advertisement"]',
                     '.related, .recommended, [class*="related"], [class*="recommended"]',
                     '.social-share, .sharing, [class*="social"], [class*="share"]',
                     '.comments, .comment-section, [class*="comment"]',
-                    'iframe[src*="twitter"], iframe[src*="facebook"], iframe[src*="youtube"]'
+                    'iframe[src*="twitter"], iframe[src*="facebook"], iframe[src*="youtube"]',
+                    // Guardian-specific noise
+                    '[data-component="sign-in-gate"], [class*="sign-in"], [class*="signin"]',
+                    '[class*="newsletter"], [class*="subscription"], [class*="supporter"]',
+                    '[class*="rich-link"], [class*="callout"], [class*="submeta"]',
+                    'figure figcaption',
+                    // BBC-specific noise
+                    '[class*="MediaPlayer"], [class*="media-player"]',
+                    // General noise
+                    '[class*="cookie"], [class*="consent"], [class*="banner"]',
+                    '[class*="popup"], [class*="modal"], [class*="overlay"]',
+                    'header'
                 ];
 
                 removeSelectors.forEach(selector => {
@@ -1161,14 +1192,29 @@
                 // Get inner HTML and clean it
                 bodyHtml = clone.innerHTML;
 
-                // Remove empty paragraphs
+                // Clean up in a temp container
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = bodyHtml;
+
+                // Remove empty paragraphs
                 tempDiv.querySelectorAll('p').forEach(p => {
                     if (!p.textContent.trim()) {
                         p.remove();
                     }
                 });
+
+                // Remove hidden elements
+                tempDiv.querySelectorAll('[hidden], [aria-hidden="true"], [style*="display:none"], [style*="display: none"]').forEach(el => el.remove());
+
+                // Remove data attributes that bloat storage
+                tempDiv.querySelectorAll('*').forEach(el => {
+                    [...el.attributes].forEach(attr => {
+                        if (attr.name.startsWith('data-') || attr.name === 'class' || attr.name === 'id') {
+                            el.removeAttribute(attr.name);
+                        }
+                    });
+                });
+
                 bodyHtml = tempDiv.innerHTML;
             }
 
@@ -1220,10 +1266,30 @@
                         '/login', '/signin', '/signup', '/register',
                         '/live/', '/video/', '/videos/',
                         '/search', '/archive',
-                        '/amp/'
+                        '/amp/',
+                        // Utility / non-article pages
+                        '/accessibility', '/help/', '/info/',
+                        '/preference', '/identity/', '/email/',
+                        '/newsletters', '/apps', '/crosswords',
+                        '/subscribe', '/membership', '/supporter',
+                        '/guardian-masterclasses', '/jobs',
+                        '/weather', '/tv-and-radio',
+                        // BBC-specific
+                        '/sounds/', '/iplayer/', '/bitesize/',
+                        '/programmes/', '/weather/', '/sport/',
+                        '/reel/', '/worklife/', '/future/',
+                        // Independent-specific
+                        '/vouchercodes', '/extras/'
                     ];
 
                     if (excludePatterns.some(pattern => pathname.includes(pattern))) return;
+
+                    // Must be a deep-enough path to be an article (not just /section)
+                    const pathSegments = pathname.split('/').filter(s => s.length > 0);
+                    if (pathSegments.length < 2) return;
+
+                    // Exclude homepage itself
+                    if (pathname === '/' || pathname === '') return;
 
                     // Try to get link text or title attribute
                     let title = link.textContent.trim();
@@ -1343,6 +1409,15 @@
                             try {
                                 const articleHtml = await fetchViaProxy(link.url);
                                 const extracted = extractArticle(articleHtml, link.url);
+
+                                // Quality check: skip articles with too little body text
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = extracted.content || '';
+                                const bodyText = tempDiv.textContent.trim();
+                                if (bodyText.length < 200) {
+                                    // Too short to be a real article — skip it
+                                    return;
+                                }
 
                                 const article = {
                                     id: `${siteId}-${Date.now()}-${Math.random()}`,
@@ -1727,6 +1802,8 @@
         document.getElementById('closeSettingsBtn').addEventListener('click', () => closeModal('settingsModal'));
         document.getElementById('proxyUrlInput').addEventListener('change', (e) => {
             setProxyUrl(e.target.value);
+            // Hide or show the proxy banner based on whether URL is now configured
+            document.getElementById('proxyBanner').style.display = e.target.value.trim() ? 'none' : 'block';
         });
 
         document.getElementById('darkModeToggle').addEventListener('click', () => {
