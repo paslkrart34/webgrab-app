@@ -7,7 +7,7 @@
  * - Proxy requests: network-first with cache fallback
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `webgrab-${CACHE_VERSION}`;
 
 /**

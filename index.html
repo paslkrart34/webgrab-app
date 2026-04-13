@@ -245,64 +245,187 @@
             color: #666;
         }
 
-        /* Article list styles */
-        .article-item {
-            padding: 12px;
-            margin-bottom: 8px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+        /* ===== NEWSPAPER HOMEPAGE LAYOUT ===== */
+
+        /* Newspaper container */
+        .newspaper {
+            padding: 0;
+        }
+
+        /* --- HERO / LEAD STORY --- */
+        .np-hero {
             cursor: pointer;
-            transition: background-color 0.2s;
-            border-left: 3px solid transparent;
-            border-left-color: #4361ee;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 16px;
         }
-
-        body.light-mode .article-item {
-            background-color: rgba(0, 0, 0, 0.02);
-            border-left-color: #4361ee;
+        body.light-mode .np-hero {
+            border-bottom-color: rgba(0,0,0,0.1);
         }
-
-        .article-item:active {
-            background-color: rgba(255, 255, 255, 0.1);
+        .np-hero-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #16213e;
         }
-
-        .article-title {
-            font-weight: 600;
+        body.light-mode .np-hero-img {
+            background-color: #e0e0e0;
+        }
+        .np-hero-title {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+        .np-hero-snippet {
             font-size: 15px;
-            margin-bottom: 4px;
-            line-height: 1.4;
+            line-height: 1.5;
+            color: #b0b0b0;
+            margin-bottom: 6px;
         }
-
-        .article-meta {
+        body.light-mode .np-hero-snippet {
+            color: #555;
+        }
+        .np-hero-byline {
             font-size: 12px;
-            color: #a0a0a0;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
+            color: #888;
         }
 
-        body.light-mode .article-meta {
+        /* --- SECTION BLOCK --- */
+        .np-section {
+            margin-bottom: 20px;
+            border-top: 3px solid #4361ee;
+            padding-top: 8px;
+        }
+        .np-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+        }
+
+        /* --- STORY CARDS --- */
+        .np-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .np-card {
+            cursor: pointer;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        body.light-mode .np-card {
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        .np-card:active {
+            opacity: 0.7;
+        }
+        .np-card.span-2 {
+            grid-column: span 2;
+        }
+        .np-card-img {
+            width: 100%;
+            aspect-ratio: 3/2;
+            object-fit: cover;
+            border-radius: 3px;
+            margin-bottom: 6px;
+            background-color: #16213e;
+        }
+        body.light-mode .np-card-img {
+            background-color: #e0e0e0;
+        }
+        .np-card-title {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+        .np-card.span-2 .np-card-title {
+            font-size: 18px;
+        }
+        .np-card-snippet {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #999;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        body.light-mode .np-card-snippet {
             color: #666;
         }
-
-        .article-badge {
-            background-color: #4361ee;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .np-card-byline {
             font-size: 11px;
-            font-weight: 500;
+            color: #777;
+            margin-top: 3px;
         }
 
-        .article-section {
-            background-color: rgba(67, 97, 238, 0.2);
-            color: #4361ee;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
+        /* --- COMPACT LIST ITEM (for smaller stories within a section) --- */
+        .np-list-item {
+            cursor: pointer;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
         }
+        body.light-mode .np-list-item {
+            border-bottom-color: rgba(0,0,0,0.06);
+        }
+        .np-list-item:active {
+            opacity: 0.7;
+        }
+        .np-list-thumb {
+            width: 80px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 3px;
+            flex-shrink: 0;
+            background-color: #16213e;
+        }
+        body.light-mode .np-list-thumb {
+            background-color: #e0e0e0;
+        }
+        .np-list-title {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        /* --- GUARDIAN-SPECIFIC COLOURS --- */
+        .np-section.guardian-news       { border-top-color: #c70000; }
+        .np-section.guardian-news .np-section-title { color: #c70000; }
+        .np-section.guardian-opinion     { border-top-color: #e05600; }
+        .np-section.guardian-opinion .np-section-title { color: #e05600; }
+        .np-section.guardian-sport       { border-top-color: #0084c6; }
+        .np-section.guardian-sport .np-section-title { color: #0084c6; }
+        .np-section.guardian-culture     { border-top-color: #a1845c; }
+        .np-section.guardian-culture .np-section-title { color: #a1845c; }
+        .np-section.guardian-lifestyle   { border-top-color: #bb3b80; }
+        .np-section.guardian-lifestyle .np-section-title { color: #bb3b80; }
+        .np-section.guardian-default     { border-top-color: #052962; }
+        .np-section.guardian-default .np-section-title { color: #4a7ab5; }
+        body.light-mode .np-section.guardian-default .np-section-title { color: #052962; }
+
+        /* --- BBC-SPECIFIC --- */
+        .np-section.bbc-section          { border-top-color: #bb1919; }
+        .np-section.bbc-section .np-section-title { color: #bb1919; }
+
+        /* --- INDEPENDENT-SPECIFIC --- */
+        .np-section.independent-section  { border-top-color: #ec1a2e; }
+        .np-section.independent-section .np-section-title { color: #ec1a2e; }
+
+        /* --- FALLBACK / GENERIC --- */
+        .np-section.generic-section      { border-top-color: #4361ee; }
+        .np-section.generic-section .np-section-title { color: #4361ee; }
 
         /* Reader view styles */
         .reader-container {
@@ -637,20 +760,7 @@
             font-size: 20px;
         }
 
-        /* Section divider in article list */
-        .section-divider {
-            padding: 12px 16px 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #a0a0a0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 8px;
-        }
-
-        body.light-mode .section-divider {
-            color: #666;
-        }
+        /* (section-divider removed — replaced by np-section layout) */
 
         /* Sync all button animation */
         .sync-icon {
@@ -1562,6 +1672,53 @@
         /**
          * Render the site view (list of articles for a site)
          */
+        /**
+         * Extract a plain-text snippet from stored article HTML
+         */
+        function getSnippet(article, maxLen = 120) {
+            if (!article.content) return '';
+            const div = document.createElement('div');
+            div.innerHTML = article.content;
+            const text = div.textContent.trim().replace(/\s+/g, ' ');
+            return text.length > maxLen ? text.slice(0, maxLen) + '…' : text;
+        }
+
+        /**
+         * Build a proxied image URL (or empty string if none)
+         */
+        function proxyImg(url) {
+            if (!url) return '';
+            const proxy = getProxyUrl();
+            return proxy ? `${proxy}${proxy.includes('?') ? '&' : '?'}url=${encodeURIComponent(url)}` : url;
+        }
+
+        /**
+         * Detect which layout family a site belongs to
+         */
+        function getSiteLayout(site) {
+            const u = (site.url || '').toLowerCase();
+            if (u.includes('theguardian.com')) return 'guardian';
+            if (u.includes('bbc.co.uk') || u.includes('bbc.com')) return 'bbc';
+            if (u.includes('independent.co.uk')) return 'independent';
+            return 'generic';
+        }
+
+        /**
+         * Map a Guardian section name to a CSS class for its accent colour
+         */
+        function guardianSectionClass(section) {
+            const s = (section || '').toLowerCase();
+            if (['news', 'uk news', 'world news', 'politics', 'environment', 'science', 'global development', 'us news', 'australia news'].some(k => s.includes(k))) return 'guardian-news';
+            if (['opinion', 'comment is free', 'editorials', 'letters'].some(k => s.includes(k))) return 'guardian-opinion';
+            if (['sport', 'football', 'cricket', 'rugby', 'tennis', 'cycling', 'formula 1', 'f1'].some(k => s.includes(k))) return 'guardian-sport';
+            if (['culture', 'film', 'music', 'books', 'art', 'stage', 'tv', 'television', 'games'].some(k => s.includes(k))) return 'guardian-culture';
+            if (['lifestyle', 'food', 'recipes', 'health', 'fashion', 'travel', 'money', 'wellness'].some(k => s.includes(k))) return 'guardian-lifestyle';
+            return 'guardian-default';
+        }
+
+        /**
+         * Render the site view — newspaper-style homepage
+         */
         async function renderSiteView() {
             const site = await getSite(currentSiteId);
             if (!site) return;
@@ -1589,46 +1746,106 @@
                 return;
             }
 
+            const layout = getSiteLayout(site);
             container.innerHTML = '';
+            container.className = 'newspaper';
 
-            // Group by section if available
+            // Helper: make a card clickable
+            const bindClick = (el, article) => {
+                el.addEventListener('click', () => {
+                    currentArticleId = article.id;
+                    renderReaderView();
+                    navigateTo('readerView');
+                });
+            };
+
+            // --- HERO: first article with an image ---
+            const heroArticle = allArticlesInSite.find(a => a.heroImageUrl) || allArticlesInSite[0];
+            const heroEl = document.createElement('div');
+            heroEl.className = 'np-hero';
+            const heroImgSrc = proxyImg(heroArticle.heroImageUrl);
+            heroEl.innerHTML = `
+                ${heroImgSrc ? `<img src="${heroImgSrc}" alt="" class="np-hero-img" onerror="this.style.display='none'">` : ''}
+                <div class="np-hero-title">${heroArticle.title}</div>
+                <div class="np-hero-snippet">${getSnippet(heroArticle, 160)}</div>
+                ${heroArticle.byline ? `<div class="np-hero-byline">${heroArticle.byline}</div>` : ''}
+            `;
+            bindClick(heroEl, heroArticle);
+            container.appendChild(heroEl);
+
+            // --- Remaining articles grouped by section ---
+            const remaining = allArticlesInSite.filter(a => a.id !== heroArticle.id);
             const bySection = {};
-            allArticlesInSite.forEach(article => {
-                const sectionName = article.section || 'Uncategorized';
+            remaining.forEach(article => {
+                const sectionName = article.section || 'More stories';
                 if (!bySection[sectionName]) bySection[sectionName] = [];
                 bySection[sectionName].push(article);
             });
 
-            // Render articles grouped by section
-            Object.entries(bySection).forEach(([section, sectionArticles]) => {
-                const divider = document.createElement('div');
-                divider.className = 'section-divider';
-                divider.textContent = section;
-                container.appendChild(divider);
+            // Sort sections: put larger sections first for visual weight
+            const sortedSections = Object.entries(bySection).sort((a, b) => b[1].length - a[1].length);
 
-                sectionArticles.forEach(article => {
-                    const item = document.createElement('div');
-                    item.className = 'article-item';
+            sortedSections.forEach(([section, sectionArticles]) => {
+                const sectionEl = document.createElement('div');
 
-                    const isNew = (Date.now() - article.savedAt) < (24 * 60 * 60 * 1000); // Less than 24 hours old
+                // Apply site-specific section class
+                let sectionClass = 'generic-section';
+                if (layout === 'guardian') sectionClass = guardianSectionClass(section);
+                else if (layout === 'bbc') sectionClass = 'bbc-section';
+                else if (layout === 'independent') sectionClass = 'independent-section';
 
-                    item.innerHTML = `
-                        <div class="article-title">${article.title}</div>
-                        <div class="article-meta">
-                            ${article.byline ? `<span>${article.byline}</span>` : ''}
-                            ${article.section ? `<span class="article-section">${article.section}</span>` : ''}
-                            ${isNew ? `<span class="article-badge">NEW</span>` : ''}
-                        </div>
-                    `;
+                sectionEl.className = `np-section ${sectionClass}`;
 
-                    item.addEventListener('click', () => {
-                        currentArticleId = article.id;
-                        renderReaderView();
-                        navigateTo('readerView');
-                    });
+                const titleEl = document.createElement('div');
+                titleEl.className = 'np-section-title';
+                titleEl.textContent = section;
+                sectionEl.appendChild(titleEl);
 
-                    container.appendChild(item);
+                const gridEl = document.createElement('div');
+                gridEl.className = 'np-grid';
+
+                sectionArticles.forEach((article, idx) => {
+                    if (idx === 0 && sectionArticles.length > 2) {
+                        // Lead card for the section: spans 2 columns with image
+                        const card = document.createElement('div');
+                        card.className = 'np-card span-2';
+                        const imgSrc = proxyImg(article.heroImageUrl);
+                        card.innerHTML = `
+                            ${imgSrc ? `<img src="${imgSrc}" alt="" class="np-card-img" onerror="this.style.display='none'">` : ''}
+                            <div class="np-card-title">${article.title}</div>
+                            <div class="np-card-snippet">${getSnippet(article, 100)}</div>
+                            ${article.byline ? `<div class="np-card-byline">${article.byline}</div>` : ''}
+                        `;
+                        bindClick(card, article);
+                        gridEl.appendChild(card);
+                    } else if (idx < 5) {
+                        // Regular cards in 2-col grid with thumbnail
+                        const card = document.createElement('div');
+                        card.className = 'np-card';
+                        const imgSrc = proxyImg(article.heroImageUrl);
+                        card.innerHTML = `
+                            ${imgSrc ? `<img src="${imgSrc}" alt="" class="np-card-img" onerror="this.style.display='none'">` : ''}
+                            <div class="np-card-title">${article.title}</div>
+                        `;
+                        bindClick(card, article);
+                        gridEl.appendChild(card);
+                    } else {
+                        // Compact list items for the rest
+                        const item = document.createElement('div');
+                        item.className = 'np-list-item';
+                        item.style.gridColumn = 'span 2';
+                        const thumbSrc = proxyImg(article.heroImageUrl);
+                        item.innerHTML = `
+                            ${thumbSrc ? `<img src="${thumbSrc}" alt="" class="np-list-thumb" onerror="this.style.display='none'">` : ''}
+                            <div class="np-list-title">${article.title}</div>
+                        `;
+                        bindClick(item, article);
+                        gridEl.appendChild(item);
+                    }
                 });
+
+                sectionEl.appendChild(gridEl);
+                container.appendChild(sectionEl);
             });
         }
 
